@@ -1,0 +1,142 @@
+-- // ACUSADO NINJA HUB - ULTRA SAFE PURPLE EDITION 👑 //
+-- Key: BACK01
+
+local CLAVE_CORRECTA = "BACK01"
+
+-- Variables de Control
+_G.Hitbox_Size = 15
+_G.Hitbox_Active = false
+_G.ESP_Master = false
+_G.ESP_Name = false
+_G.ESP_Box = false
+_G.ESP_Dist = false
+_G.ESP_Health = false
+_G.ESP_Tracer = false
+_G.ESP_Inv = false
+
+local function ExecuteHub()
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local Lighting = game:GetService("Lighting")
+    local L_Plr = Players.LocalPlayer
+    local Camera = workspace.CurrentCamera
+
+    local ScreenGui = Instance.new("ScreenGui")
+    pcall(function() ScreenGui.Parent = (gethui and gethui()) or game:GetService("CoreGui") end)
+    ScreenGui.Name = "ACUSADO_PURPLE_" .. math.random(1e5, 9e5)
+
+    -- // COLORES MORADO Y NEGRO //
+    local Purple_Neon = Color3.fromRGB(160, 32, 240)
+    local Carbon_Black = Color3.fromRGB(10, 10, 10)
+    local Dark_Purple = Color3.fromRGB(40, 0, 70)
+
+    -- // SISTEMA ESP MODULAR //
+    local function CreateESP(plt)
+        local Box = Drawing.new("Square"); Box.Thickness = 1.5; Box.Filled = false; Box.Color = Purple_Neon
+        local Name = Drawing.new("Text"); Name.Size = 14; Name.Center = true; Name.Outline = true; Name.Color = Color3.new(1,1,1)
+        local Dist = Drawing.new("Text"); Dist.Size = 13; Dist.Center = true; Dist.Outline = true
+        local HealthB = Drawing.new("Line"); HealthB.Thickness = 2
+        local Tracer = Drawing.new("Line"); Tracer.Thickness = 1; Tracer.Color = Purple_Neon
+        local Inv = Drawing.new("Text"); Inv.Size = 13; Inv.Center = true; Inv.Outline = true; Inv.Color = Color3.new(0.8, 0.5, 1)
+
+        local conn; conn = RunService.RenderStepped:Connect(function()
+            if _G.ESP_Master and plt.Character and plt.Character:FindFirstChild("HumanoidRootPart") and plt.Character:FindFirstChild("Humanoid") and plt.Character.Humanoid.Health > 0 then
+                local hrp = plt.Character.HumanoidRootPart
+                local hum = plt.Character.Humanoid
+                local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+                if onScreen then
+                    local sizeX = 2300 / pos.Z; local sizeY = 3200 / pos.Z
+                    local top = pos.Y - sizeY/2; local bot = pos.Y + sizeY/2
+                    Box.Visible = _G.ESP_Box; Box.Size = Vector2.new(sizeX, sizeY); Box.Position = Vector2.new(pos.X - sizeX/2, top)
+                    Name.Visible = _G.ESP_Name; Name.Text = plt.Name; Name.Position = Vector2.new(pos.X, top - 30)
+                    Dist.Visible = _G.ESP_Dist; Dist.Text = math.floor((Camera.CFrame.p - hrp.Position).Magnitude).."m"; Dist.Position = Vector2.new(pos.X, top - 15)
+                    HealthB.Visible = _G.ESP_Health; HealthB.From = Vector2.new(pos.X - sizeX/2 - 5, bot); HealthB.To = Vector2.new(pos.X - sizeX/2 - 5, bot - (sizeY * (hum.Health/hum.MaxHealth))); HealthB.Color = Color3.fromHSV(0.8, 1, 1)
+                    Tracer.Visible = _G.ESP_Tracer; Tracer.From = Vector2.new(Camera.ViewportSize.X/2, 0); Tracer.To = Vector2.new(pos.X, top)
+                    Inv.Visible = _G.ESP_Inv; local tool = plt.Character:FindFirstChildOfClass("Tool"); Inv.Text = tool and "["..tool.Name.."]" or "[Nada]"; Inv.Position = Vector2.new(pos.X, bot + 5)
+                else Box.Visible = false; Name.Visible = false; Dist.Visible = false; HealthB.Visible = false; Tracer.Visible = false; Inv.Visible = false end
+            else
+                Box.Visible = false; Name.Visible = false; Dist.Visible = false; HealthB.Visible = false; Tracer.Visible = false; Inv.Visible = false
+                if not plt.Parent then Box:Remove(); Name:Remove(); Dist:Remove(); HealthB:Remove(); Tracer:Remove(); Inv:Remove(); conn:Disconnect() end
+            end
+        end)
+    end
+    for _, p in pairs(Players:GetPlayers()) do if p ~= L_Plr then CreateESP(p) end end
+    Players.PlayerAdded:Connect(function(p) CreateESP(p) end)
+
+    -- // LÓGICA HITBOX //
+    task.spawn(function()
+        while true do
+            task.wait(math.random(1, 2))
+            if _G.Hitbox_Active then
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= L_Plr and p.Character and p.Character:FindFirstChild("Head") then
+                        pcall(function()
+                            local h = p.Character.Head
+                            if h.Size.X ~= _G.Hitbox_Size then h.Size = Vector3.new(_G.Hitbox_Size, _G.Hitbox_Size, _G.Hitbox_Size); h.Transparency = 1; h.CanCollide = false; h.Massless = true end
+                        end)
+                    end
+                end
+            end
+        end
+    end)
+
+    -- // BOTÓN DE RE-APERTURA (ABRIR) //
+    local OpenBtn = Instance.new("TextButton", ScreenGui)
+    OpenBtn.Size = UDim2.new(0, 80, 0, 30); OpenBtn.Position = UDim2.new(0, 10, 0.5, 0); OpenBtn.Visible = false; OpenBtn.Text = "ABRIR"; OpenBtn.BackgroundColor3 = Carbon_Black; OpenBtn.TextColor3 = Purple_Neon; OpenBtn.Font = Enum.Font.Code; Instance.new("UICorner", OpenBtn); Instance.new("UIStroke", OpenBtn).Color = Purple_Neon
+
+    -- // INTERFAZ KEY //
+    local KeyFrame = Instance.new("Frame", ScreenGui); KeyFrame.Size = UDim2.new(0, 320, 0, 180); KeyFrame.Position = UDim2.new(0.5, -160, 0.5, -90); KeyFrame.BackgroundColor3 = Carbon_Black; Instance.new("UICorner", KeyFrame); Instance.new("UIStroke", KeyFrame).Color = Purple_Neon
+    local KeyTitle = Instance.new("TextLabel", KeyFrame); KeyTitle.Size = UDim2.new(1, 0, 0, 45); KeyTitle.Text = "BIENVENIDO AL SCRIPT DE ACUSADO"; KeyTitle.TextColor3 = Purple_Neon; KeyTitle.BackgroundTransparency = 1; KeyTitle.Font = Enum.Font.Code; KeyTitle.TextSize = 14
+    local KeyInput = Instance.new("TextBox", KeyFrame); KeyInput.Size = UDim2.new(0, 240, 0, 40); KeyInput.Position = UDim2.new(0.5, -120, 0.45, 0); KeyInput.PlaceholderText = "CONTRASEÑA"; KeyInput.Text = ""; KeyInput.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyInput.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", KeyInput)
+    local KeyBtn = Instance.new("TextButton", KeyFrame); KeyBtn.Size = UDim2.new(0, 120, 0, 35); KeyBtn.Position = UDim2.new(0.5, -60, 0.78, 0); KeyBtn.Text = "VALIDAR"; KeyBtn.TextColor3 = Purple_Neon; KeyBtn.BackgroundColor3 = Dark_Purple; Instance.new("UICorner", KeyBtn)
+
+    -- // MENÚ PRINCIPAL //
+    local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.Size = UDim2.new(0, 530, 0, 390); MainFrame.Position = UDim2.new(0.5, -265, 0.5, -190); MainFrame.BackgroundColor3 = Carbon_Black; MainFrame.Visible = false; MainFrame.Active = true; MainFrame.Draggable = true; Instance.new("UICorner", MainFrame); Instance.new("UIStroke", MainFrame).Color = Purple_Neon
+    local Banner = Instance.new("TextLabel", MainFrame); Banner.Size = UDim2.new(1, 0, 0, 45); Banner.Text = "  BIENVENIDO AL SCRIPT DE ACUSADO 👑"; Banner.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Banner.TextColor3 = Purple_Neon; Banner.Font = Enum.Font.Code; Banner.TextSize = 16; Banner.TextXAlignment = Enum.TextXAlignment.Left; Instance.new("UICorner", Banner)
+
+    KeyBtn.MouseButton1Click:Connect(function() 
+        if KeyInput.Text == CLAVE_CORRECTA then 
+            KeyBtn.Text = "ACCEDER AL HUB"; KeyBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 150); KeyInput.Text = "CLAVE CORRECTA ✅"; KeyInput.Interactable = false
+            KeyBtn.MouseButton1Click:Connect(function() KeyFrame:Destroy(); MainFrame.Visible = true end)
+        else KeyInput.Text = ""; KeyInput.PlaceholderText = "CLAVE INCORRECTA ❌" end 
+    end)
+    OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true; OpenBtn.Visible = false end)
+
+    -- TABS
+    local Container = Instance.new("Frame", MainFrame); Container.Position = UDim2.new(0, 150, 0, 55); Container.Size = UDim2.new(1, -160, 1, -65); Container.BackgroundTransparency = 1
+    local Tabs = { Combat = Instance.new("ScrollingFrame"), Visuals = Instance.new("ScrollingFrame"), Misc = Instance.new("ScrollingFrame") }
+    for name, f in pairs(Tabs) do f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = (name=="Combat"); f.Parent = Container; f.ScrollBarThickness = 0; Instance.new("UIListLayout", f).Padding = UDim.new(0, 8) end
+
+    local function AddBtn(tab, txt, func)
+        local b = Instance.new("TextButton", Tabs[tab]); b.Size = UDim2.new(1, -10, 0, 38); b.BackgroundColor3 = Color3.fromRGB(30,30,30); b.Text = "[ "..txt.." ]"; b.TextColor3 = Purple_Neon; b.Font = Enum.Font.Code; Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(function() pcall(func) end)
+    end
+
+    AddBtn("Combat", "CARGAR AIMBOT MOBILE", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/DanielHubll/DanielHubll/refs/heads/main/Aimbot%20Mobile"))() end)
+    local SzIn = Instance.new("TextBox", Tabs.Combat); SzIn.Size = UDim2.new(1, -10, 0, 38); SzIn.PlaceholderText = "TAMAÑO CABEZA"; SzIn.BackgroundColor3 = Color3.fromRGB(15,15,15); SzIn.TextColor3 = Purple_Neon; SzIn.Font = Enum.Font.Code; Instance.new("UICorner", SzIn)
+    SzIn.FocusLost:Connect(function() _G.Hitbox_Size = tonumber(SzIn.Text) or 15 end)
+    AddBtn("Combat", "ACTIVAR CABEZAS INVISIBLES", function() _G.Hitbox_Active = not _G.Hitbox_Active end)
+
+    AddBtn("Visuals", "MASTER ESP (ON/OFF)", function() _G.ESP_Master = not _G.ESP_Master end)
+    AddBtn("Visuals", "ESP NAME", function() _G.ESP_Name = not _G.ESP_Name end)
+    AddBtn("Visuals", "ESP BOX NO RELLENA", function() _G.ESP_Box = not _G.ESP_Box end)
+    AddBtn("Visuals", "ESP DISTANCIA", function() _G.ESP_Dist = not _G.ESP_Dist end)
+    AddBtn("Visuals", "ESP VIDA", function() _G.ESP_Health = not _G.ESP_Health end)
+    AddBtn("Visuals", "ESP LINEA ARRIBA", function() _G.ESP_Tracer = not _G.ESP_Tracer end)
+    AddBtn("Visuals", "ESP INVENTARIO", function() _G.ESP_Inv = not _G.ESP_Inv end)
+
+    AddBtn("Misc", "OPTIMIZAR FPS", function() Lighting.GlobalShadows = false; for _, v in pairs(game:GetDescendants()) do if v:IsA("Part") then v.Material = "SmoothPlastic" elseif v:IsA("Decal") then v:Destroy() end end end)
+    AddBtn("Misc", "ACUSADO DELETE TOOL", function() local t = Instance.new("Tool", L_Plr.Backpack); t.Name = "DEL_TOOL"; t.RequiresHandle = false; t.Activated:Connect(function() local tar = L_Plr:GetMouse().Target if tar then tar:Destroy() end end) end)
+
+    local Sidebar = Instance.new("Frame", MainFrame); Sidebar.Size = UDim2.new(0, 140, 1, -55); Sidebar.Position = UDim2.new(0, 5, 0, 50); Sidebar.BackgroundTransparency = 1
+    local function AddTab(txt, target, y)
+        local b = Instance.new("TextButton", Sidebar); b.Size = UDim2.new(1, -10, 0, 45); b.Position = UDim2.new(0, 5, 0, y); b.BackgroundColor3 = Color3.fromRGB(20,20,20); b.Text = txt; b.TextColor3 = Purple_Neon; b.Font = Enum.Font.Code; Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(function() for _, t in pairs(Tabs) do t.Visible = false end; Tabs[target].Visible = true end)
+    end
+    AddTab("COMBATE", "Combat", 0); AddTab("VISUALES", "Visuals", 55); AddTab("SISTEMA", "Misc", 110)
+
+    local CloseBtn = Instance.new("TextButton", MainFrame); CloseBtn.Size = UDim2.new(0, 30, 0, 30); CloseBtn.Position = UDim2.new(1, -38, 0, 8); CloseBtn.Text = "X"; CloseBtn.BackgroundColor3 = Color3.fromRGB(70,0,0); CloseBtn.TextColor3 = Purple_Neon; Instance.new("UICorner", CloseBtn)
+    CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false; OpenBtn.Visible = true end)
+end
+
+pcall(ExecuteHub)
